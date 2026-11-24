@@ -48,8 +48,18 @@ jobs:
       - name: Clone or Pull Latest Code
         run: |
           if [ -d "${{ env.BUILD_DIR }}/.git" ]; then
-            git -C "${{ env.BUILD_DIR }}" reset --hard HEAD
-            git -C "${{ env.BUILD_DIR }}" pull
+            # Match Gitea exactly, even after a force-push: no leftover branches, remote refs or old objects, because
+            # the publish gate checks every ref in this folder.
+            cd "${{ env.BUILD_DIR }}"
+            git fetch --prune --force origin '+refs/heads/*:refs/remotes/origin/*'
+            git checkout -f -B master origin/master
+            git reset --hard origin/master
+            git clean -fdx -e node_modules
+            for b in $(git for-each-ref --format='%(refname:short)' refs/heads | grep -v '^master$'); do git branch -D "$b"; done
+            for t in $(git tag); do git tag -d "$t" >/dev/null; done
+            git fetch --tags --force origin
+            git reflog expire --expire=now --all
+            git gc --prune=now --quiet
           else
             mkdir -p "${{ env.BUILD_DIR }}"
             git clone "${{ env.REPO_URL }}" "${{ env.BUILD_DIR }}"
