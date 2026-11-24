@@ -1,0 +1,54 @@
+{
+  "id": "charging",
+  "name": "Charging Waypoints",
+  "description": "Time and PTO tracking: timesheets, charge codes, teams and reports.",
+  "port": 5580,
+  "container": "chargingwaypoints-app",
+  "image": "ghcr.io/j5guy/chargingwaypoints",
+  "fields": [
+    {
+      "env": "ADMIN_EMAIL",
+      "label": "Your email address",
+      "type": "email",
+      "required": true,
+      "help": "Sign up with this email first and you become the administrator."
+    }
+  ],
+  "settings": [
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_ENABLED", "label": "Offer LDAP sign-in", "type": "bool", "default": "false", "help": "These are used until someone saves settings under Admin > LDAP in Charging. After that, what is saved there wins." },
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_URL", "label": "Directory address", "type": "text", "help": "For example ldaps://dc.example.com" },
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_BIND_DN", "label": "Service account", "type": "text", "help": "The distinguished name (DN) of the account used to look people up." },
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_BIND_PASSWORD", "label": "Service account password", "type": "secret" },
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_SEARCH_BASE", "label": "Where to search for people", "type": "text" },
+    { "level": "basic", "group": "Sign in with your company directory (optional)", "env": "LDAP_SEARCH_FILTER", "label": "Search filter", "type": "text", "default": "(sAMAccountName={{username}})", "help": "Must contain {{username}}." },
+
+    { "level": "basic", "group": "Single sign-on (optional)", "env": "OIDC_ENABLED", "label": "Offer single sign-on", "type": "bool", "default": "false", "help": "Used until someone saves settings under Admin > OIDC / SSO in Charging. After that, what is saved there wins." },
+    { "level": "basic", "group": "Single sign-on (optional)", "env": "OIDC_ISSUER_URL", "label": "Provider address", "type": "text", "help": "The provider's issuer URL." },
+    { "level": "basic", "group": "Single sign-on (optional)", "env": "OIDC_CLIENT_ID", "label": "Client ID", "type": "text" },
+    { "level": "basic", "group": "Single sign-on (optional)", "env": "OIDC_CLIENT_SECRET", "label": "Client secret", "type": "secret" },
+    { "level": "basic", "group": "Single sign-on (optional)", "env": "OIDC_SCOPES", "label": "Scopes", "type": "text", "default": "openid profile email" },
+
+    { "level": "advanced", "group": "Directory sign-in", "env": "LDAP_TLS_REJECT_UNAUTHORIZED", "label": "Check the directory's certificate", "type": "choice", "default": "",
+      "options": [ { "value": "", "label": "Not set (any certificate is accepted)" }, { "value": "true", "label": "Check it (recommended)" }, { "value": "false", "label": "Accept any certificate" } ],
+      "help": "Checking needs the certificate to be trusted by the app's container." },
+    { "level": "advanced", "group": "Single sign-on", "env": "OIDC_TRUST_UNVERIFIED_EMAIL", "label": "Trust emails the provider has not verified", "type": "bool", "default": "false", "help": "Only for a provider that never sends email_verified and guarantees the address itself." },
+    { "level": "advanced", "group": "Email", "env": "SMTP_ALLOW_PRIVATE_HOSTS", "label": "Allow mail servers on your private network", "type": "bool", "default": "false", "help": "People connect their own outgoing mail server. Turn this on only if reminders must go through a mail relay on your internal network." },
+
+    { "level": "advanced", "group": "Database", "env": "MONGO_IMAGE", "target": "compose", "label": "Database version", "type": "choice", "default": "mongo:7",
+      "options": [ { "value": "mongo:7", "label": "MongoDB 7 (default)" }, { "value": "mongo:4.4.18", "label": "MongoDB 4.4.18 (Raspberry Pi 4 or older)" } ],
+      "help": "Only change this for a Raspberry Pi 4 or older. On an install that already has data, switching versions can stop the database from starting." }
+  ],
+  "insideApp": [
+    "Email cannot be set from the Gateway: each person connects their own outgoing mail server on My Account.",
+    "LDAP and single sign-on can also be saved inside Charging, under Admin. What is saved there takes priority over what the Gateway sets."
+  ],
+  "storage": [
+    { "env": "MONGO_HOST_DIR", "volume": "mongo-data", "label": "Database", "help": "Timesheets, PTO and teams. The most important one." },
+    { "env": "UPLOADS_HOST_DIR", "volume": "uploads-data", "label": "Uploaded files", "help": "Files people attach." },
+    { "env": "BACKUPS_HOST_DIR", "volume": "backups-data", "label": "Backups", "help": "Backups. Best kept on a different disk from the database." },
+    { "env": "SECRETS_HOST_DIR", "volume": "secrets-data", "label": "Secrets", "help": "Keys the app made for itself. Keep them with your backups." },
+    { "env": "DATA_HOST_DIR", "volume": "data-store", "label": "App settings file", "help": "Settings the app saves for itself." },
+    { "env": "LOGS_HOST_DIR", "volume": "logs-data", "label": "Log files", "help": "Records of what the app did." }
+  ],
+  "postInstall": "Open Charging, sign up with the administrator email you entered, then follow its first-steps page."
+}

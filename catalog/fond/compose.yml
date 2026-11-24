@@ -1,0 +1,66 @@
+# Installed by the Waypoints Gateway. Fond behind the shared proxy: no ports are published,
+# the proxy reaches the app over the waypoints-proxy network.
+#
+# Each data location is a Docker-managed volume by default. The *_HOST_DIR variables (set from the app's Storage
+# card in the Gateway) switch one to a folder on this computer instead. Saved settings are added by the
+# Gateway as an override file, so nothing else here needs editing.
+services:
+  app:
+    image: ghcr.io/j5guy/fondwaypoints:latest
+    container_name: fondwaypoints-app
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      WEB_FQDN: ${WEB_FQDN:-localhost}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      mongoHost: mongo
+      mongoPort: "27017"
+      mongoDBName: fondwaypoints
+      mongoUser: ""
+      mongoPass: ""
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5560/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ${UPLOADS_HOST_DIR:-uploads-data}:/app/public/uploads
+      - ${LOGS_HOST_DIR:-logs-data}:/app/logs
+      - ${BACKUPS_HOST_DIR:-backups-data}:/app/backups
+      - ${SECRETS_HOST_DIR:-secrets-data}:/app/.secrets
+      - ${DATA_HOST_DIR:-appdata-data}:/app/.data
+    networks:
+      - default
+      - proxy
+
+  mongo:
+    image: ${MONGO_IMAGE:-mongo:7}
+    container_name: fondwaypoints-mongo
+    restart: unless-stopped
+    volumes:
+      - ${MONGO_HOST_DIR:-mongo-data}:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping')\" || mongo --quiet --eval \"db.adminCommand('ping')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - default
+
+volumes:
+  mongo-data:
+  uploads-data:
+  logs-data:
+  backups-data:
+  secrets-data:
+  appdata-data:
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: waypoints-proxy

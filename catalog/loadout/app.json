@@ -1,0 +1,58 @@
+{
+  "id": "loadout",
+  "name": "Loadout Waypoints",
+  "description": "Plan and track your training: exercises, workouts and progress.",
+  "port": 5556,
+  "container": "loadoutwaypoints-app",
+  "image": "ghcr.io/j5guy/loadoutwaypoints",
+  "fields": [],
+  "settings": [
+    { "level": "basic", "group": "General", "env": "TZ", "label": "Time zone", "type": "text", "help": "For example America/New_York. Leave empty for UTC. It affects dates, scheduled backups and \"This week\"." },
+
+    { "level": "basic", "group": "Email", "env": "SMTP_HOST", "label": "Mail server", "type": "text", "help": "Needed for \"Forgot your password?\". Without it an administrator has to reset passwords. Values here override the ones saved in Loadout under Admin > Settings." },
+    { "level": "basic", "group": "Email", "env": "SMTP_PORT", "label": "Mail server port", "type": "number", "default": "587" },
+    { "level": "basic", "group": "Email", "env": "SMTP_USER", "label": "Mail user name", "type": "text" },
+    { "level": "basic", "group": "Email", "env": "SMTP_PASS", "label": "Mail password", "type": "secret" },
+    { "level": "basic", "group": "Email", "env": "MAIL_FROM", "label": "Send as", "type": "text", "help": "For example: Loadout <noreply@example.com>" },
+
+    { "level": "advanced", "group": "Email", "env": "SMTP_SECURE", "label": "Secure connection", "type": "choice", "default": "",
+      "options": [ { "value": "", "label": "Automatic (secure on port 465)" }, { "value": "true", "label": "Always secure from the start" }, { "value": "false", "label": "Not from the start (STARTTLS)" } ],
+      "help": "Leave on Automatic unless your mail server needs otherwise." },
+
+    { "level": "advanced", "group": "Limits", "env": "BACKUP_RESTORE_MAX_GB", "label": "Largest backup to restore (GB)", "type": "number", "default": "100", "help": "How large a full-site backup may be once unpacked. Raise it only if your backups really are larger." },
+    { "level": "advanced", "group": "Limits", "env": "USER_IMPORT_MAX_MB", "label": "Largest \"My data\" import (MB)", "type": "number", "default": "500" },
+    { "level": "advanced", "group": "Limits", "env": "USER_IMPORT_JSON_MAX_MB", "label": "Largest data file inside an import (MB)", "type": "number", "default": "64" },
+
+    { "level": "advanced", "group": "Media storage", "env": "STORAGE_DRIVER", "label": "Keep uploaded images and videos", "type": "choice", "default": "",
+      "options": [ { "value": "", "label": "On this computer (default)" }, { "value": "s3", "label": "In an S3-compatible bucket (S3, R2, B2)" } ],
+      "help": "Choosing a bucket also needs the bucket details below. Existing media is not moved for you." },
+    { "level": "advanced", "group": "Media storage", "env": "S3_ENDPOINT", "label": "Bucket address", "type": "text", "help": "For example https://<account>.r2.cloudflarestorage.com" },
+    { "level": "advanced", "group": "Media storage", "env": "S3_REGION", "label": "Bucket region", "type": "text", "default": "auto", "help": "auto for Cloudflare R2, a real region for AWS." },
+    { "level": "advanced", "group": "Media storage", "env": "S3_ACCESS_KEY_ID", "label": "Access key ID", "type": "text" },
+    { "level": "advanced", "group": "Media storage", "env": "S3_SECRET_ACCESS_KEY", "label": "Secret access key", "type": "secret" },
+    { "level": "advanced", "group": "Media storage", "env": "S3_BUCKET", "label": "Bucket name", "type": "text" },
+    { "level": "advanced", "group": "Media storage", "env": "S3_PUBLIC_BASE_URL", "label": "Public address of the bucket", "type": "text", "help": "For example https://files.example.com" },
+
+    { "level": "advanced", "group": "Private network", "env": "TAILSCALE_AUTHKEY", "label": "Tailscale key", "type": "secret", "help": "Joins your tailnet at start, so log export and Pushgateway can reach private addresses." },
+    { "level": "advanced", "group": "Private network", "env": "TAILSCALE_HOSTNAME", "label": "Name on your tailnet", "type": "text", "default": "loadout-waypoints" },
+
+    { "level": "advanced", "group": "Settings storage", "env": "SETTINGS_IN_DATABASE", "label": "Keep a copy of saved settings in the database", "type": "bool", "default": "false", "help": "For hosts that replace their disk on every deploy." },
+
+    { "level": "advanced", "group": "Database", "env": "MONGO_URI", "label": "Full database connection string", "type": "secret", "help": "For example mongodb+srv://... Leave empty to use the bundled database. When set, the bundled one is not used." },
+    { "level": "advanced", "group": "Database", "env": "MONGO_IMAGE", "target": "compose", "label": "Database version", "type": "choice", "default": "mongo:7",
+      "options": [ { "value": "mongo:7", "label": "MongoDB 7 (default)" }, { "value": "mongo:4.4.18", "label": "MongoDB 4.4.18 (Raspberry Pi 4 or older)" } ],
+      "help": "Only change this for a Raspberry Pi 4 or older. On an install that already has data, switching versions can stop the database from starting." }
+  ],
+  "insideApp": [
+    "The public hostname, email, logging, metrics and LDAP details can also be set inside Loadout, under Admin > Settings. What is saved there takes priority over what the Gateway sets.",
+    "Exercise and plan libraries are managed inside Loadout."
+  ],
+  "storage": [
+    { "env": "MONGO_HOST_DIR", "volume": "mongo-data", "label": "Database", "help": "Your plans, workouts and progress. The most important one." },
+    { "env": "UPLOADS_HOST_DIR", "volume": "uploads-data", "label": "Uploaded images and videos", "help": "Exercise media. Ignored if you keep media in an S3 bucket." },
+    { "env": "BACKUPS_HOST_DIR", "volume": "backups-data", "label": "Backups", "help": "Full-site backups. Best kept on a different disk from the database." },
+    { "env": "SECRETS_HOST_DIR", "volume": "secrets-data", "label": "Secrets", "help": "Keys and the first admin password the app made for itself. Keep them with your backups." },
+    { "env": "LOGS_HOST_DIR", "volume": "logs-data", "label": "Log files", "help": "Records of what the app did." }
+  ],
+  "postInstall": "On first start Loadout creates an administrator password. Read it with: docker logs loadoutwaypoints-app"
+}

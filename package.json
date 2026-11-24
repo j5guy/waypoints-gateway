@@ -1,0 +1,14 @@
+{
+  "name": "waypoints-gateway",
+  "version": "0.15.0",
+  "description": "Click-through setup for Waypoints apps: a shared HTTPS reverse proxy (Caddy) or a guide for your own.",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

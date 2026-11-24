@@ -1,0 +1,45 @@
+# Waypoints Gateway: the only file you need.
+#
+#   docker compose up -d
+#
+# Then open http://<this computer's address>:8080, create a password, and follow the steps. The gateway sets up
+# secure HTTPS and installs your apps for you, and stays running to show their status and keep them updated.
+#
+# It mounts the Docker socket, which gives it control of Docker on this computer, so keep port 8080 on your own
+# network and never publish it to the internet.
+services:
+  gateway:
+    image: ghcr.io/j5guy/waypoints-gateway:latest
+    container_name: waypoints-gateway
+    pull_policy: always
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      # The same page, encrypted. The browser warns once: the certificate is the Gateway's own.
+      - "8443:8443"
+    environment:
+      # This computer's address, so the Gateway's own certificate matches it (the installer fills this in).
+      GATEWAY_IP: ${GATEWAY_IP:-}
+      # Optional: an app to tick by default in the setup steps, e.g. balanced, or fond,loadout.
+      PRESELECT: ${PRESELECT:-}
+      # Optional: your time zone, for example America/New_York. Automatic updates run at the hour you choose in this
+      # time zone (UTC when empty).
+      TZ: ${TZ:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gateway-data:/data
+      # The key that encrypts saved passwords and secrets, kept apart from the data above on purpose. Do not
+      # delete this volume: without it saved secrets cannot be read and have to be entered again.
+      - gateway-key:/key
+      # Read-only: lets the setup page offer the local certificate for download.
+      - caddy-data:/caddy-data:ro
+
+volumes:
+  gateway-data:
+    name: waypoints-gateway-data
+  gateway-key:
+    name: waypoints-gateway-key
+  caddy-data:
+    name: waypoints-caddy-data

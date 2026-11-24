@@ -1,0 +1,6 @@
+node_modules
+.git
+.gitea
+docs
+docs-admin
+*.md

@@ -1,0 +1,64 @@
+name: Test build of the Waypoints Gateway
+
+# On a push to the test branch: run the checks, build the image from this checkout, and (re)start it on the test
+# server so you can click through the setup page. Nothing is pushed to GHCR. Open http://<test server>:8080 within 15
+# minutes of the start to create a password (port 8080 must be free on the test server)
+# Needs these repository variables (Settings > Actions > Variables), so no server address is written in this file:
+# LOCAL_GITEA_HOST (your Gitea's address) and LOCAL_GITEA_REPO (the repository as owner/name, for example
+# allthewaypoints/gateway). Gitea reserves variable names that start with GITEA_, which is why these start with LOCAL_.
+
+env:
+  REPO_URL: git@${{ vars.LOCAL_GITEA_HOST }}:/${{ vars.LOCAL_GITEA_REPO }}.git
+  DOCKER_DIR: /opt/waypoints-gateway
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  checks:
+    runs-on: web-test
+    steps:
+      - name: Check the repository variables
+        run: |
+          if [ -z "${{ vars.LOCAL_GITEA_HOST }}" ] || [ -z "${{ vars.LOCAL_GITEA_REPO }}" ]; then
+            echo "Set the repository variables LOCAL_GITEA_HOST (your Gitea's address) and LOCAL_GITEA_REPO (owner/name) in Settings > Actions > Variables." >&2
+            exit 1
+          fi
+
+      - name: Clone or Pull Latest Code
+        run: |
+          if [ -d "/var/www/html/waypoints-gateway/.git" ]; then
+            git -C /var/www/html/waypoints-gateway reset --hard HEAD
+            git -C /var/www/html/waypoints-gateway pull
+          else
+            mkdir -p /var/www/html/waypoints-gateway
+            git clone -b test "${{ env.REPO_URL }}" /var/www/html/waypoints-gateway
+          fi
+
+      - name: Syntax and catalog checks
+        run: bash scripts/check.sh
+        working-directory: /var/www/html/waypoints-gateway
+
+  docker-test-deploy:
+    needs: checks
+    runs-on: docker-test
+    steps:
+      - name: Clone or Pull Latest Code
+        run: |
+          if [ -d "${{ env.DOCKER_DIR }}/.git" ]; then
+            git -C "${{ env.DOCKER_DIR }}" reset --hard HEAD
+            git -C "${{ env.DOCKER_DIR }}" pull
+          else
+            mkdir -p "${{ env.DOCKER_DIR }}"
+            git clone -b test "${{ env.REPO_URL }}" "${{ env.DOCKER_DIR }}"
+          fi
+
+      - name: Build the image
+        run: docker build -t waypoints-gateway-test:latest .
+        working-directory: ${{ env.DOCKER_DIR }}
+
+      - name: Start it
+        run: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+        working-directory: ${{ env.DOCKER_DIR }}

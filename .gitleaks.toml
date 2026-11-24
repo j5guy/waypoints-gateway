@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "documented placeholders"
+paths = [
+  '''LICENSE''',
+]
+regexes = [
+  '''user:pass@''', '''USER:PASS@''',
+]

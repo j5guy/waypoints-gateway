@@ -1,0 +1,6 @@
+# Added when you use your own reverse proxy: publishes the app's port so your proxy can reach it.
+# 127.0.0.1 = only this machine; 0.0.0.0 = the whole network.
+services:
+  app:
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-5580}:5580"

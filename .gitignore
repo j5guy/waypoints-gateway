@@ -1,0 +1,19 @@
+.claude*
+.claude/*
+.vscode*
+.vscode/*
+node_modules/
+.env
+!.env.example
+*.log
+
+# Runtime state the Gateway writes (secrets, settings, backups, certificates). Never commit it.
+.secrets/
+.data/
+data/
+exports/
+certs/
+*.pem
+*.key
+*.p12
+*.pfx

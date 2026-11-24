@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Waypoints Gateway</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
+</head>
+<body>
+    <header class="top">
+        <div class="wrap">
+            <strong class="brand">Waypoints Gateway</strong>
+            <nav id="nav" aria-label="Main" hidden>
+                <button data-view="home">Home</button>
+                <button data-view="certs">Certificates</button>
+                <button data-view="updates">Updates <span class="nb" aria-label="updates available"></span></button>
+                <button data-view="shared">Shared settings</button>
+                <button data-view="settings">Settings</button>
+            </nav>
+            <button id="logout" class="link" hidden>Sign out</button>
+        </div>
+    </header>
+    <main id="app" class="wrap" aria-live="polite">
+        <p class="muted">Loading...</p>
+    </main>
+    <footer id="footer" class="wrap site-footer"></footer>
+    <noscript><p class="wrap">This page needs JavaScript.</p></noscript>
+    <script src="/app.js"></script>
+    <script src="/footer.js"></script>
+</body>
+</html>

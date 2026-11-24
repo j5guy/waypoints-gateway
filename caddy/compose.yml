@@ -1,0 +1,30 @@
+# The built-in proxy: Caddy, with the Caddyfile the gateway writes. Started and reloaded by the gateway.
+services:
+  caddy:
+    image: caddy:2
+    container_name: waypoints-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    command: caddy run --config /gateway/caddy/Caddyfile --adapter caddyfile --watch
+    volumes:
+      - gateway-data:/gateway:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - proxy
+
+volumes:
+  gateway-data:
+    external: true
+    name: waypoints-gateway-data
+  caddy-data:
+    name: waypoints-caddy-data
+  caddy-config:
+
+networks:
+  proxy:
+    external: true
+    name: waypoints-proxy

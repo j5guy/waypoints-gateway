@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Runs before every commit. Turn it on once per clone:  git config core.hooksPath .githooks
+# It refuses a commit that carries the wrong identity, a file that must never be committed, a secret, or a string from
+# your private denylist. (See PUBLISHING_RUNBOOK.md, Stage 2.)
+set -e
+ALLOWED="dev@allthewaypoints.com"
+[ "$(git config user.email)" = "$ALLOWED" ] || { echo "Commit identity is $(git config user.email), expected $ALLOWED"; exit 1; }
+
+# blocked file types (kept in .githooks/blocked-paths.regex; .env.example is allowed)
+if git diff --cached --name-only --diff-filter=ACMR | grep -v -E '(^|/)\.env\.example$' | grep -E -f .githooks/blocked-paths.regex; then
+  echo "Blocked file staged."; exit 1
+fi
+
+# secrets in the staged change
+gitleaks protect --staged --redact --no-banner -c .gitleaks.toml
+
+# private denylist on the staged change
+DENY_RAW="${PUBLISH_DENYLIST_FILE:-$HOME/.publish-denylist}"
+DENY="$(mktemp)"; trap 'rm -f "$DENY"' EXIT
+# Drop blank lines (an empty pattern matches every line) and # comments, and any Windows line endings.
+[ -f "$DENY_RAW" ] && tr -d '\r' < "$DENY_RAW" | grep -v -E '^[[:space:]]*(#.*)?$' > "$DENY"
+if [ -s "$DENY" ] && git diff --cached -U0 -- . ':!.gitea' ':!LICENSE' | grep -E '^\+[^+]' | grep -i -E -f "$DENY"; then
+  echo "Denylisted string in staged change."; exit 1
+fi

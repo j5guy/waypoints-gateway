@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Runs before every push: the whole publish gate (identity, secrets, denylist, file types, refs), on the full history.
+exec bash scripts/publish-gate.sh

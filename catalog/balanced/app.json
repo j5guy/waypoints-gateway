@@ -1,0 +1,55 @@
+{
+  "id": "balanced",
+  "name": "Balanced Waypoints",
+  "description": "Personal budgeting: accounts, a register, budgets, schedules and reports.",
+  "port": 5570,
+  "container": "balancedwaypoints-app",
+  "image": "ghcr.io/j5guy/balancedwaypoints",
+  "fields": [
+    {
+      "env": "ADMIN_EMAIL",
+      "label": "Your email address",
+      "type": "email",
+      "required": true,
+      "help": "Sign up with this email first and you become the administrator."
+    }
+  ],
+  "settings": [
+    { "level": "basic", "group": "Display", "env": "CURRENCY_SYMBOL", "label": "Currency symbol", "type": "text", "default": "$", "help": "Shown before amounts. A label only, with no conversion." },
+    { "level": "basic", "group": "Display", "env": "DEFAULT_TIMEZONE", "label": "Default time zone", "type": "text", "default": "America/New_York", "help": "For people who have not picked one. Admin > Settings in Balanced overrides it." },
+
+    { "level": "basic", "group": "Sign-up", "env": "DISABLE_SIGNUP", "label": "Close sign-up after the first account", "type": "bool", "default": "false", "help": "Other accounts are then created by an administrator." },
+
+    { "level": "basic", "group": "Email", "env": "SMTP_HOST", "label": "Mail server", "type": "text", "help": "Together with \"Send as\", this makes Admin > Mail Server in Balanced read-only." },
+    { "level": "basic", "group": "Email", "env": "MAIL_FROM", "label": "Send as", "type": "text", "help": "For example: Balanced Waypoints <noreply@example.com>. Needed with a mail server." },
+    { "level": "basic", "group": "Email", "env": "SMTP_PORT", "label": "Mail server port", "type": "number", "default": "587" },
+    { "level": "basic", "group": "Email", "env": "SMTP_USER", "label": "Mail user name", "type": "text" },
+    { "level": "basic", "group": "Email", "env": "SMTP_PASS", "label": "Mail password", "type": "secret" },
+
+    { "level": "advanced", "group": "Email", "env": "SMTP_SECURE", "label": "Secure connection", "type": "choice", "default": "",
+      "options": [ { "value": "", "label": "Automatic (secure on port 465)" }, { "value": "true", "label": "Always secure from the start" }, { "value": "false", "label": "Not from the start (STARTTLS)" } ],
+      "help": "Leave on Automatic unless your mail server needs otherwise." },
+
+    { "level": "advanced", "group": "Network", "env": "ALLOW_PRIVATE_OUTBOUND", "label": "Allow private-network addresses for mail and bank sync", "type": "bool", "default": "false", "help": "Leave off unless you run your own mail relay or SimpleFIN bridge on your network." },
+
+    { "level": "advanced", "group": "Settings storage", "env": "SETTINGS_IN_DATABASE", "label": "Keep a copy of saved settings in the database", "type": "bool", "default": "false", "help": "For hosts that replace their disk on every deploy." },
+
+    { "level": "advanced", "group": "Database", "env": "MONGO_URI", "label": "Full database connection string", "type": "secret", "help": "For example mongodb+srv:// for Atlas. Leave empty to use the bundled database. When set, the bundled one is not used." },
+    { "level": "advanced", "group": "Database", "env": "MONGO_IMAGE", "target": "compose", "label": "Database version", "type": "choice", "default": "mongo:7",
+      "options": [ { "value": "mongo:7", "label": "MongoDB 7 (default)" }, { "value": "mongo:4.4.18", "label": "MongoDB 4.4.18 (Raspberry Pi 4 or older)" } ],
+      "help": "Only change this for a Raspberry Pi 4 or older. On an install that already has data, switching versions can stop the database from starting." }
+  ],
+  "insideApp": [
+    "The mail server and LDAP can also be set inside Balanced, under Admin. What is saved there takes priority, and a mail server set from the Gateway makes Admin > Mail Server read-only.",
+    "Each person connects their own bank sync inside Balanced."
+  ],
+  "storage": [
+    { "env": "MONGO_HOST_DIR", "volume": "mongo-data", "label": "Database", "help": "Your accounts, transactions and budgets. The most important one." },
+    { "env": "UPLOADS_HOST_DIR", "volume": "uploads-data", "label": "Uploaded files", "help": "Attachments and imports." },
+    { "env": "BACKUPS_HOST_DIR", "volume": "backups-data", "label": "Backups", "help": "Backups. Best kept on a different disk from the database." },
+    { "env": "SECRETS_HOST_DIR", "volume": "secrets-data", "label": "Secrets", "help": "The master key the app made for itself. Without it your data cannot be read, so keep it with your backups." },
+    { "env": "DATA_HOST_DIR", "volume": "appdata-data", "label": "App settings file", "help": "Settings saved under Admin > Settings." },
+    { "env": "LOGS_HOST_DIR", "volume": "logs-data", "label": "Log files", "help": "Records of what the app did." }
+  ],
+  "postInstall": "Open Balanced, choose sign up, and use the administrator email you entered."
+}

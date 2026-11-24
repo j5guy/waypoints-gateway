@@ -1,0 +1,63 @@
+# Installed by the Waypoints Gateway. Loadout behind the shared proxy: no ports are published,
+# the proxy reaches the app over the waypoints-proxy network.
+#
+# Each data location is a Docker-managed volume by default. The *_HOST_DIR variables (set from the app's Storage
+# card in the Gateway) switch one to a folder on this computer instead. Saved settings are added by the
+# Gateway as an override file, so nothing else here needs editing.
+services:
+  app:
+    image: ghcr.io/j5guy/loadoutwaypoints:latest
+    container_name: loadoutwaypoints-app
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      PORT: "5556"
+      WEB_FQDN: ${WEB_FQDN:-localhost}
+      PUBLIC_URL: https://${WEB_FQDN:-localhost}
+      TRUST_PROXY: "1"
+      AUTH_MODE: local
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ""
+      mongoHost: mongo
+      mongoPort: "27017"
+      mongoDBName: loadoutwaypoints
+      mongoUser: ""
+      mongoPass: ""
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ${UPLOADS_HOST_DIR:-uploads-data}:/app/public/uploads
+      - ${LOGS_HOST_DIR:-logs-data}:/app/logs
+      - ${SECRETS_HOST_DIR:-secrets-data}:/app/.secrets
+      - ${BACKUPS_HOST_DIR:-backups-data}:/app/backups
+    networks:
+      - default
+      - proxy
+
+  mongo:
+    image: ${MONGO_IMAGE:-mongo:7}
+    container_name: loadoutwaypoints-mongo
+    restart: unless-stopped
+    volumes:
+      - ${MONGO_HOST_DIR:-mongo-data}:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping')\" || mongo --quiet --eval \"db.adminCommand('ping')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - default
+
+volumes:
+  mongo-data:
+  uploads-data:
+  logs-data:
+  secrets-data:
+  backups-data:
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: waypoints-proxy

@@ -1,0 +1,66 @@
+# Installed by the Waypoints Gateway. Balanced behind the shared proxy: no ports are published,
+# the proxy reaches the app over the waypoints-proxy network.
+#
+# Each data location is a Docker-managed volume by default. The *_HOST_DIR variables (set from the app's Storage
+# card in the Gateway) switch one to a folder on this computer instead. Saved settings are added by the
+# Gateway as an override file, so nothing else here needs editing.
+services:
+  app:
+    image: ghcr.io/j5guy/balancedwaypoints:latest
+    container_name: balancedwaypoints-app
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      PORT: "5570"
+      WEB_FQDN: ${WEB_FQDN:-localhost}
+      WEB_PROTOCOL: https
+      TRUST_PROXY: "1"
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ""
+      CURRENCY_SYMBOL: "$$"
+      LDAP_ENABLED: "false"
+      mongoHost: mongo
+      mongoPort: "27017"
+      mongoDBName: balancedwaypoints
+      mongoUser: ""
+      mongoPass: ""
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ${UPLOADS_HOST_DIR:-uploads-data}:/app/public/uploads
+      - ${LOGS_HOST_DIR:-logs-data}:/app/logs
+      - ${BACKUPS_HOST_DIR:-backups-data}:/app/backups
+      - ${SECRETS_HOST_DIR:-secrets-data}:/app/.secrets
+      - ${DATA_HOST_DIR:-appdata-data}:/app/.data
+    networks:
+      - default
+      - proxy
+
+  mongo:
+    image: ${MONGO_IMAGE:-mongo:7}
+    container_name: balancedwaypoints-mongo
+    restart: unless-stopped
+    volumes:
+      - ${MONGO_HOST_DIR:-mongo-data}:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping')\" || mongo --quiet --eval \"db.adminCommand('ping')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - default
+
+volumes:
+  mongo-data:
+  uploads-data:
+  logs-data:
+  backups-data:
+  secrets-data:
+  appdata-data:
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: waypoints-proxy

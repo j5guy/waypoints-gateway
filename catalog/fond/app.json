@@ -1,0 +1,49 @@
+{
+  "id": "fond",
+  "name": "Fond Waypoints",
+  "description": "An encrypted place for the accounts, wishes and contacts your family would need.",
+  "port": 5560,
+  "container": "fondwaypoints-app",
+  "image": "ghcr.io/j5guy/fondwaypoints",
+  "fields": [
+    {
+      "env": "ADMIN_EMAIL",
+      "label": "Your email address",
+      "type": "email",
+      "required": true,
+      "help": "The first account created with this email becomes the administrator. Set it before you sign up."
+    }
+  ],
+  "settings": [
+    { "level": "basic", "group": "Who can sign up", "env": "SIGNUP_ALLOWLIST", "label": "Allowed email addresses", "type": "text", "help": "Separate with commas. Leave empty to let anyone who can reach the site sign up. The administrator's email is always allowed." },
+
+    { "level": "basic", "group": "Email", "env": "SMTP_HOST", "label": "Mail server", "type": "text", "help": "Leave the email settings empty and invitations are only written to the log. You can also set email up inside Fond under Admin, which takes priority over these." },
+    { "level": "basic", "group": "Email", "env": "SMTP_PORT", "label": "Mail server port", "type": "number", "default": "587", "help": "465 uses a secure connection from the start." },
+    { "level": "basic", "group": "Email", "env": "SMTP_USER", "label": "Mail user name", "type": "text" },
+    { "level": "basic", "group": "Email", "env": "SMTP_PASS", "label": "Mail password", "type": "secret" },
+    { "level": "basic", "group": "Email", "env": "SMTP_FROM", "label": "Send as", "type": "text", "help": "For example: Fond Waypoints <noreply@example.com>" },
+
+    { "level": "basic", "group": "Emergency access", "env": "DEFAULT_WAIT_DAYS", "label": "Suggested waiting days", "type": "number", "default": "14", "help": "The waiting period suggested when someone invites a trusted contact (1 to 90 days)." },
+
+    { "level": "basic", "group": "Backups", "env": "BACKUP_ENABLED", "label": "Back up automatically", "type": "bool", "default": "false", "help": "What you save under Admin > Scheduled Backups in Fond takes priority." },
+    { "level": "basic", "group": "Backups", "env": "BACKUP_FREQUENCY_HOURS", "label": "Hours between backups", "type": "number", "default": "24" },
+    { "level": "basic", "group": "Backups", "env": "BACKUP_RETENTION_COUNT", "label": "Backups to keep", "type": "number", "default": "14" },
+
+    { "level": "advanced", "group": "Database", "env": "MONGO_IMAGE", "target": "compose", "label": "Database version", "type": "choice", "default": "mongo:7",
+      "options": [ { "value": "mongo:7", "label": "MongoDB 7 (default)" }, { "value": "mongo:4.4.18", "label": "MongoDB 4.4.18 (Raspberry Pi 4 or older)" } ],
+      "help": "Only change this for a Raspberry Pi 4 or older, which cannot run MongoDB 5 or newer. On an install that already has data, switching versions can stop the database from starting." }
+  ],
+  "insideApp": [
+    "Email, scheduled backups, log export and metrics can also be set inside Fond, under Admin. What is saved there takes priority over what the Gateway sets.",
+    "Fond has no LDAP or single sign-on."
+  ],
+  "storage": [
+    { "env": "MONGO_HOST_DIR", "volume": "mongo-data", "label": "Database", "help": "Your accounts, entries and settings. The most important one." },
+    { "env": "UPLOADS_HOST_DIR", "volume": "uploads-data", "label": "Uploaded files", "help": "Encrypted attachments." },
+    { "env": "BACKUPS_HOST_DIR", "volume": "backups-data", "label": "Backups", "help": "Scheduled backups. Best kept on a different disk from the database." },
+    { "env": "SECRETS_HOST_DIR", "volume": "secrets-data", "label": "Secrets", "help": "Keys the app made for itself. Keep them with your backups." },
+    { "env": "DATA_HOST_DIR", "volume": "appdata-data", "label": "App settings file", "help": "Settings saved under Admin > Logs & Metrics." },
+    { "env": "LOGS_HOST_DIR", "volume": "logs-data", "label": "Log files", "help": "Records of what the app did." }
+  ],
+  "postInstall": "Open Fond, choose Get started, and sign up with the administrator email you entered."
+}

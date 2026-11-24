@@ -1,0 +1,53 @@
+name: Sync documentation to the docs site
+
+# Publishes docs/site/*.md and docs-admin/site/*.md to the docs site whenever they change on master. Needs, in this
+# repository's Settings > Actions: the variable DOCS_URL (e.g. https://docs.allthewaypoints.com) and the secrets
+# DOCS_TOKEN and ADMIN_DOCS_TOKEN (API tokens from the docs app: Docs > Updates > API tokens, allowed to write the
+# space below). The space gateway-waypoints must exist first (Docs > Spaces, public). Pages are created and updated,
+# and --prune removes pages whose file is gone (needs "May delete" on the token). Also needs the variables LOCAL_GITEA_HOST
+# (your Gitea's address) and LOCAL_GITEA_REPO (the repository as owner/name), so no server address is written in this file.
+# (Gitea reserves variable names that start with GITEA_, which is why these start with LOCAL_.)
+
+env:
+  REPO_URL: git@${{ vars.LOCAL_GITEA_HOST }}:/${{ vars.LOCAL_GITEA_REPO }}.git
+  DOCS_SPACE: gateway-waypoints
+  DOCS_ADMIN_SPACE: administration
+  DOCS_SOURCE: git:waypoints-gateway
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/site/**'
+      - 'docs-admin/site/**'
+      - '.gitea/workflows/docs.yml'
+
+jobs:
+  docs-sync:
+    runs-on: web-prod
+    steps:
+      - name: Check the repository variables
+        run: |
+          if [ -z "${{ vars.LOCAL_GITEA_HOST }}" ] || [ -z "${{ vars.LOCAL_GITEA_REPO }}" ]; then
+            echo "Set the repository variables LOCAL_GITEA_HOST (your Gitea's address) and LOCAL_GITEA_REPO (owner/name) in Settings > Actions > Variables." >&2
+            exit 1
+          fi
+
+      - name: Sync docs/site to the docs site
+        run: |
+          work="$(mktemp -d)"
+          git clone --depth 1 --branch master "${{ env.REPO_URL }}" "$work/repo"
+          curl -fsSL "${{ vars.DOCS_URL }}/tools/docs-sync.js" -o "$work/docs-sync.js"
+          DOCS_URL="${{ vars.DOCS_URL }}" DOCS_TOKEN="${{ secrets.DOCS_TOKEN }}" DOCS_SOURCE="${{ env.DOCS_SOURCE }}" \
+            node "$work/docs-sync.js" "$work/repo/docs/site" --space "${{ env.DOCS_SPACE }}" --prune
+          rm -rf "$work"
+
+      - name: Sync docs-admin/site to the docs site
+        run: |
+          work="$(mktemp -d)"
+          git clone --depth 1 --branch master "${{ env.REPO_URL }}" "$work/repo"
+          curl -fsSL "${{ vars.DOCS_URL }}/tools/docs-sync.js" -o "$work/docs-sync.js"
+          DOCS_URL="${{ vars.DOCS_URL }}" DOCS_TOKEN="${{ secrets.ADMIN_DOCS_TOKEN }}" DOCS_SOURCE="${{ env.DOCS_SOURCE }}" \
+            node "$work/docs-sync.js" "$work/repo/docs-admin/site" --space "${{ env.DOCS_ADMIN_SPACE }}" --prune
+          rm -rf "$work"

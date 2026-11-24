@@ -1,0 +1,5 @@
+(^|/)\.env($|\.)
+(^|/)\.secrets(/|$)
+\.(pem|key|p12|pfx|kdbx|sqlite|db|dump|bak|har|ovpn)$
+(^|/)id_(rsa|ed25519)
+(^|/)htpasswd
