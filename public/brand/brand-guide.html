@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gateway Waypoints brand guide</title>
+<style>
+body{margin:0;background:#11161c;color:#e8edf2;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:40px 20px 80px}h1{margin:0 0 6px}h2{margin:44px 0 12px;font-size:1.2rem}p{color:#9aa8b6;margin:0 0 12px}
+.hero{display:flex;gap:28px;align-items:center;flex-wrap:wrap}.hero img{width:160px;height:160px}
+.row{display:flex;gap:18px;flex-wrap:wrap}.panel{padding:24px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.85rem}
+.dark{background:#0a0a0a;color:#9aa8b6}.light{background:#f6f7f9;color:#5d6b7a}.panel img{width:96px;height:96px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.s{background:#19212a;border:1px solid #2b3541;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:2px;font-size:.85rem}
+.s i{height:48px;border-radius:6px;border:1px solid #2b3541;margin-bottom:6px}.s code{color:#9aa8b6}.s span{color:#9aa8b6;font-size:.8rem}
+.sizes{display:flex;gap:20px;align-items:flex-end}.sizes figure{margin:0;text-align:center;font-size:.8rem;color:#9aa8b6}
+li{margin:4px 0;color:#c9d3dd}code{background:#0b1016;padding:1px 6px;border-radius:4px}
+</style><main>
+<div class="hero"><img src="gateway-waypoints-icon.svg" alt="Gateway Waypoints icon"><div><h1>Gateway Waypoints</h1><p>One secure front door for all of your Waypoints apps.</p></div></div>
+<h2>Concept</h2>
+<p>Every Waypoints icon is a near-black rounded square with dotted trails running out to colored markers and one gold destination marker. Each app puts its own subject in the middle: a daisy for Fond, a clock for Charging, bars for Balanced. The Gateway's subject is an archway. The gold marker sits in the doorway, and four trails fan out from the top of the arch, one to each app's marker color. It is the one icon in the family that points outward at the others.</p>
+<h2>Versions</h2>
+<div class="row">
+<div class="panel dark"><img src="gateway-waypoints-mark.svg" alt="">Mark, on dark</div>
+<div class="panel light"><img src="gateway-waypoints-mark-light.svg" alt="">Mark, on light</div>
+<div class="panel dark"><img src="png/maskable-icon-512.png" alt="">Maskable (PWA)</div></div>
+<h2>Sizes</h2>
+<div class="sizes"><figure><img src="png/android-chrome-192x192.png" width="96">96</figure><figure><img src="png/favicon-32x32.png" width="32">32</figure><figure><img src="png/favicon-16x16.png" width="16">16</figure></div>
+<h2>Colors</h2><div class="g"><div class="s"><i style="background:#14171A"></i><b>Tile</b><code>#14171A</code><span>Icon background; matches Fond and Charging</span></div><div class="s"><i style="background:#0A0A0A"></i><b>Tile (social)</b><code>#0A0A0A</code><span>OG card and PWA splash; matches Balanced</span></div><div class="s"><i style="background:#F7F5F1"></i><b>Cream</b><code>#F7F5F1</code><span>Arch and wordmark on dark</span></div><div class="s"><i style="background:#22282A"></i><b>Ink</b><code>#22282A</code><span>Arch and wordmark on light</span></div><div class="s"><i style="background:#F2C879"></i><b>Gold</b><code>#F2C879</code><span>Destination marker, the "you are here" dot</span></div><div class="s"><i style="background:#1D4ED8"></i><b>Blue</b><code>#1D4ED8</code><span>App waypoint 1</span></div><div class="s"><i style="background:#0D9488"></i><b>Teal</b><code>#0D9488</code><span>App waypoint 2</span></div><div class="s"><i style="background:#D97706"></i><b>Amber</b><code>#D97706</code><span>App waypoint 3</span></div><div class="s"><i style="background:#7C3AED"></i><b>Violet</b><code>#7C3AED</code><span>App waypoint 4</span></div><div class="s"><i style="background:#15803D"></i><b>Green</b><code>#15803D</code><span>Spare waypoint for a fifth app</span></div><div class="s"><i style="background:#1D5FD1"></i><b>UI accent (light)</b><code>#1D5FD1</code><span>Existing Gateway interface</span></div><div class="s"><i style="background:#5B95F0"></i><b>UI accent (dark)</b><code>#5B95F0</code><span>Existing Gateway interface</span></div></div>
+<h2>Usage</h2><ul>
+<li>Use the tile icon wherever the other apps use theirs: tab, home screen, app lists, cards. Use the transparent mark only on a plain background.</li>
+<li>Keep the four marker colors in the same order (blue, teal, amber, violet). If the Gateway adds a fifth app, add a fifth trail in green rather than recoloring.</li>
+<li>Gold is reserved for the destination marker. Don't use it for buttons or text.</li>
+<li>Name: "Gateway Waypoints" in full on first use, "Gateway" after that. The PWA short name is "Gateway".</li>
+<li>Type: the system UI stack the Gateway already uses. The wordmark is set in bold sans, cream on dark or ink on light.</li>
+<li>Keep clear space around the icon of at least one marker diameter. Don't stretch it, add shadows, or change the tile color.</li></ul>
+<h2>Files</h2><ul>
+<li><code>gateway-waypoints-icon.svg</code>: master icon</li><li><code>gateway-waypoints-mark.svg</code>, <code>-mark-light.svg</code>: transparent marks</li>
+<li><code>favicon.ico</code>, <code>png/favicon-16x16.png</code>, <code>png/favicon-32x32.png</code>, <code>png/apple-touch-icon.png</code></li>
+<li><code>png/android-chrome-192x192.png</code>, <code>-512x512.png</code>, <code>png/maskable-icon-512.png</code>, <code>site.webmanifest</code></li>
+<li><code>png/og-image.png</code>: 1200 by 630 social card</li><li><code>gateway-brand.css</code>: color tokens</li></ul>
+</main></html>

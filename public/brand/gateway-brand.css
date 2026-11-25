@@ -1,0 +1,21 @@
+/* Gateway Waypoints brand tokens. Values match the Gateway's public/style.css and the other Waypoints apps' icons. */
+:root {
+    /* Icon and brand surfaces */
+    --gw-tile: #14171A;          /* icon tile, matches Fond and Charging */
+    --gw-tile-og: #0A0A0A;       /* social card and PWA splash, matches Balanced */
+    --gw-cream: #F7F5F1;         /* arch and wordmark on dark */
+    --gw-ink: #22282A;           /* arch and wordmark on light */
+    --gw-gold: #F2C879;          /* destination marker: "you are here" */
+
+    /* The four app waypoints: the suite accents, one per app marker */
+    --gw-wp-blue: #1D4ED8;
+    --gw-wp-teal: #0D9488;
+    --gw-wp-amber: #D97706;
+    --gw-wp-violet: #7C3AED;
+    --gw-wp-green: #15803D;      /* spare, for a fifth app */
+    --gw-wp-red: #DC2626;        /* reserved for alerts and the Balanced goal marker */
+
+    /* UI accent: unchanged from the Gateway's existing interface */
+    --gw-accent-light: #1D5FD1;
+    --gw-accent-dark: #5B95F0;
+}

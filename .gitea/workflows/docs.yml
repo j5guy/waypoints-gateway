@@ -10,7 +10,7 @@ name: Sync documentation to the docs site
 
 env:
   REPO_URL: git@${{ vars.LOCAL_GITEA_HOST }}:/${{ vars.LOCAL_GITEA_REPO }}.git
-  DOCS_SPACE: gateway-waypoints
+  DOCS_SPACE: waypoints-gateway
   DOCS_ADMIN_SPACE: administration
   DOCS_SOURCE: git:waypoints-gateway
 
